@@ -13,6 +13,7 @@ const CustomTooltip = ({ active, payload }) => {
       </Paper>
     );
   }
+  
   return null;
 };
 
