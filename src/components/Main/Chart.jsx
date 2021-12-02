@@ -1,7 +1,7 @@
 import { Box, Button, Paper, Typography } from '@mui/material';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceArea, ResponsiveContainer, } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ReferenceArea, ResponsiveContainer } from 'recharts';
 import { updateGraficAction, updateRerAreaLeftAction, updateRerAreaRigthAction, updateRerAreasAction } from '../../store/Grafic/actions';
 
 const CustomTooltip = ({ active, payload }) => {
@@ -21,22 +21,21 @@ export default function Chart() {
   const grafic = useSelector(state => state.grafic);
   const dispatch = useDispatch();
 
-  const getAxisYDomain = (from, to, ref) => {
-    const refData = grafic.data.slice(from - 1, to);
-    let [bottom, top] = [refData[0][ref], refData[0][ref]];
-    refData.forEach((item) => {
-      if (item[ref] > top) top = item[ref];
-      if (item[ref] < bottom) bottom = item[ref];
+  const getAxisYDomain = (from, to, column) => {
+    const betweenData = grafic.data.slice(from - 1, to);
+    let top = betweenData[0][column];
+    betweenData.forEach(item => {
+      if (item[column] > top) top = item[column];
     });
 
-    return [0, (top | 0) + top / 10];
+    return [0, Math.round((top | 0) + top / 10)];
   };
 
   const zoom = () => {
-    let { refAreaLeft, refAreaRight } = grafic;
-    const { data } = grafic;
+    let left = grafic.refAreaLeft;
+    let right = grafic.refAreaRight;
 
-    if (refAreaLeft === refAreaRight || refAreaRight === '') {
+    if (left === right || right === '') {
       dispatch(updateRerAreasAction({
         refAreaLeft: '',
         refAreaRight: '',
@@ -45,17 +44,18 @@ export default function Chart() {
     }
 
     // xAxis domain
-    if (refAreaLeft > refAreaRight) [refAreaLeft, refAreaRight] = [refAreaRight, refAreaLeft];
+    if (left > right) 
+      [left, right] = [right, left];
 
     // yAxis domain
-    const [bottom, top] = getAxisYDomain(refAreaLeft, refAreaRight, 'newCases');
+    const [bottom, top] = getAxisYDomain(left, right, 'newCases');
 
     dispatch(updateGraficAction({
       refAreaLeft: '',
       refAreaRight: '',
-      data: data.slice(),
-      left: refAreaLeft,
-      right: refAreaRight,
+      data: grafic.data.slice(),
+      left,
+      right,
       bottom,
       top,
     }));
@@ -63,7 +63,7 @@ export default function Chart() {
 
   const zoomOut = () => {
     dispatch(updateGraficAction({
-      data: grafic.data,
+      data: grafic.data.slice(),
       left: 'dataMin',
       right: 'dataMax',
       refAreaLeft: '',
@@ -129,6 +129,7 @@ export default function Chart() {
                     type="monotone"
                     dataKey="newCases"
                     stroke="red"
+                    animationDuration={500}
                   />
 
                   {grafic.refAreaLeft !== '' && grafic.refAreaRight !== '' ? (
