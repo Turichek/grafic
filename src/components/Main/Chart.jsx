@@ -13,7 +13,7 @@ const CustomTooltip = ({ active, payload }) => {
       </Paper>
     );
   }
-  
+
   return null;
 };
 
@@ -73,6 +73,12 @@ export default function Chart() {
     }));
   }
 
+  const onMove = (e) => {
+    if (grafic.refAreaLeft && e?.activePayload) {
+      dispatch(updateRerAreaRigthAction(e.activePayload[0].payload.id))
+    }
+  }
+
   return (
     <Paper elevation={7} sx={{
       p: 3
@@ -80,10 +86,10 @@ export default function Chart() {
       {
         grafic.data.length !== 0 ?
           <>
-            <Box sx={{ mb: 3, width:1 }}>
-              <Button sx={{ width:1 }} onClick={zoomOut} variant='contained' >Zoom Out</Button>
+            <Box sx={{ mb: 3, width: 1 }}>
+              <Button sx={{ width: 1 }} onClick={zoomOut} variant='contained' >Zoom Out</Button>
             </Box>
-            <Box sx={{userSelect: 'none' }}>
+            <Box sx={{ userSelect: 'none' }}>
               <ResponsiveContainer width="100%" height={600}>
                 <LineChart
                   data={grafic.data}
@@ -95,14 +101,11 @@ export default function Chart() {
                   }}
                   onMouseDown={(e) => dispatch(updateRerAreaLeftAction(e.activePayload[0].payload.id))
                   }
-                  onMouseMove={(e) =>
-                    grafic.refAreaLeft &&
-                    dispatch(updateRerAreaRigthAction(e.activePayload[0].payload.id))
-                  }
+                  onMouseMove={(e) => onMove(e)}
                   onMouseUp={zoom}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
+                  <XAxis
                     orientation='top'
                     dataKey="id"
                     allowDataOverflow
